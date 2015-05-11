@@ -5,9 +5,11 @@
 #include "setup.h"
 #include "motor.h"
 #include "ir.h"
+#include "encoder.h"
 
 
-void IR_PID();
+void PID();
 
 #endif
+
 

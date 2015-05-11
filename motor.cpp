@@ -20,7 +20,7 @@ extern unsigned long motor_velocity_timer_time_ms;
 /* --- PUBLICS --- */
 Motor::Motor()
 {
-    this->MAXPWM = .30*255;
+    this->MAXPWM = .3*255;
     this->BASEPWM = .75*(this->MAXPWM);
     this->left_pwm = this->MAXPWM;
     this->right_pwm = this->MAXPWM;
@@ -31,7 +31,7 @@ void Motor::MoveForward() {
   else { MoveLeftBackward(); }
   if (this->right_pwm >=0) { MoveRightForward(); }
   else { MoveRightBackward(); }
-  IR_PID();
+  PID();
 }
 
 void Motor::ForwardOneCell() {
@@ -51,6 +51,7 @@ void Motor::Turn90Left() {
   while(g_ticks_left > end_ticks_left || g_ticks_right < end_ticks_right) {
     SpinLeft(); 
   }
+  Off();
 //  Serial1.println("Spun 90 left");
 }
 
@@ -60,6 +61,7 @@ void Motor::Turn90Right() {
   while(g_ticks_left < end_ticks_left || g_ticks_right > end_ticks_right) {
     SpinRight();
   }
+  Off();
 //  Serial1.println("Spun 90 right");
 }
 
@@ -166,5 +168,6 @@ void Motor::RightOff() {
   analogWrite(g_motor_right_cw, 0);
   analogWrite(g_motor_right_ccw, 0);
 }
+
 
 

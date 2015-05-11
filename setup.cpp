@@ -55,8 +55,8 @@ extern unsigned long motor_velocity_timer_time_ms = 0;
 //Encoders
 volatile double g_ticks_left = 0;
 volatile double g_ticks_right = 0;
-extern const double TICKS_ONE_CELL = 2000;
-extern const double TICKS_90_TURN = 450;
+extern const double TICKS_ONE_CELL = 1650;
+extern const double TICKS_90_TURN = 500;
 
 //Maze
 
