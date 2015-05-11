@@ -19,6 +19,12 @@ IRSensorReading::IRSensorReading() {
     this->control_left = 0;
     this->control_mid = 0;
     this->control_right = 0;
+
+    this->left_wall_threshold = 0;
+    this->mid_wall_threshold = 0;
+    this->right_wall_threshold = 0;
+
+    this->wall_threshold = .1;
 }
 
 void IRSensorReading::ir_pulse() {
@@ -27,10 +33,16 @@ void IRSensorReading::ir_pulse() {
 }
 
 void IRSensorReading::reset_control_values() {
-  delay(IR_PULSE_RATE*3);
+  delay(IR_PULSE_RATE*3); //delay so that we get new correct ir readings rather than old ones
   this->control_left = this->left;
   this->control_mid = this->mid;
   this->control_right = this->right;
+
+  this->control_left_right_offset = this->control_left - this->control_right; //offset = control_left - control_right
+
+  this->left_wall_threshold = this->control_left*(1-this->wall_threshold);
+  this->mid_wall_threshold = this->control_mid*(1-this->wall_threshold);
+  this->right_wall_threshold = this->control_right*(1-this->wall_threshold);
   print_control_values();
 }
 
@@ -70,6 +82,17 @@ void IRSensorReading::print_control_values() {
     Serial1.print(this->control_mid);
     Serial1.print(" R:");
     Serial1.print(this->control_right);
+    Serial1.println();  
+}
+
+void IRSensorReading::print_wall_threshold_values() {
+    Serial1.print("Wall_Threshold_IR: ");
+    Serial1.print(" L:");
+    Serial1.print(this->left_wall_threshold);
+    Serial1.print(" M:");
+    Serial1.print(this->mid_wall_threshold);
+    Serial1.print(" R:");
+    Serial1.print(this->right_wall_threshold);
     Serial1.println();
 }
 

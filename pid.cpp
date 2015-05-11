@@ -16,81 +16,37 @@ static const int Kd_v = 1;
 
 
 unsigned long pid_ir_timer_time = 0;
-float p_error_ir_mid = 0;
-float p_error_ir_left = 0;
-float p_error_ir_right = 0;
-float i_error_ir_mid = 0;
-float i_error_ir_left = 0;
-float i_error_ir_right = 0;
-float prev_error_ir_mid = 0;
-float prev_error_ir_left = 0;
-float prev_error_ir_right = 0;
-float d_error_ir_mid = 0;
-float d_error_ir_left = 0;
-float d_error_ir_right = 0;
-
-unsigned long pid_v_timer_time = 0;
-float p_error_ir_mid = 0;
-float p_error_ir_left = 0;
-float p_error_ir_right = 0;
-float i_error_ir_mid = 0;
-float i_error_ir_left = 0;
-float i_error_ir_right = 0;
-float prev_error_ir_mid = 0;
-float prev_error_ir_left = 0;
-float prev_error_ir_right = 0;
-float d_error_ir_mid = 0;
-float d_error_ir_left = 0;
-float d_error_ir_right = 0;
+int prev_ir_error = 0;
 
 void PID() {
 /* IR PI */
 /**
-*   Error: Actual - Excpected)
-*   IRSensorError = sensorError() * IRScalingFactor;
+*   IRSensorError = sensorError();
 *   IRSensorErrorInteg += IRSensorError; 
 */
-    // unsigned long ir_dt_ms = (micros()-pid_ir_timer_time)/1000;
-    unsigned long ir_dt_ms = 1;
-    float irscalingfactor = 1;
-    float error_ir_mid = (g_ir.mid - g_ir.control_mid) * irscalingfactor;
-    float error_ir_left = (g_ir.left - g_ir.control_left)* irscalingfactor; //( actual - expected)
-    float error_ir_right = (g_ir.right - g_ir.control_right)* irscalingfactor;
-    p_error_ir_mid = Kp_ir*error_ir_mid;
-    p_error_ir_left = Kp_ir*error_left_ir;
-    p_error_ir_right = Kp_ir*error_right_ir;
-    i_error_ir_mid += Ki_ir*error_ir_mid*ir_dt_ms;
-    i_error_ir_left += Ki_ir*error_left_ir*ir_dt_ms;
-    i_error_ir_right += Ki_ir*error_right_ir*ir_dt_ms;
-    d_error_ir_mid += Kd_ir*(error_ir_mid)/ir_dt_ms;
-    d_error_ir_left += Kd_ir*(error_left_ir)/ir_dt_ms;
-    d_error_ir_right += Kd_ir*(error_right_ir)/ir_dt_ms;
-    float prev_error_ir_mid = error_ir_mid;
-    float prev_error_ir_left = error_ir_left;
-    float prev_error_ir_right = error_ir_right;
+    //take in values now so i work with values from same exact time as possible
+    int ir_error = 0;
+    int cur_ir_left = g_ir.left;
+    int cur_ir_mid = g_ir.mid;
+    int cur_ir_right = g_ir.right;
 
-    if(g_ir.mid > g_ir.control_mid) { //too close to front wall
-        digitalWrite(g_left_led, HIGH); //LEFT LED ON
-        digitalWrite(g_right_led, HIGH); //RIGHT LED ON
+    //IR PID
+    if (cur_ir_left > g_ir.left_wall_threshold && cur_ir_right < g_ir.right_wall_threshold) { //both walls
+        ir_error = cur_ir_left - cur_ir_right; //left - right
+        /* so left is positive error, right is negative error */
     }
-    else {
-        if (g_ir.left > g_ir.control_left && g_ir.right < g_ir.control_right) { //too close to left so ROTATE RIGHT
-          //left +error
-          //right -error
-            digitalWrite(g_left_led, HIGH); //LEFT LED ON
-            digitalWrite(g_right_led, LOW); //too close to right so ROTATE RIGHT
-        }
-        else if (g_ir.left < g_ir.control_left && g_ir.right > g_ir.control_right) { //too close to right so ROTATE LEFT
-            digitalWrite(g_left_led, LOW);
-            digitalWrite(g_right_led, HIGH); //RIGHT LED ON
-        }
-    //        if (g_ir.right < 50) g_motor.Turn90Left();
-        else {
-            digitalWrite(g_left_led, LOW);
-            digitalWrite(g_right_led, LOW);
-        }
+    else if (cur_ir_left > g_ir.left_wall_threshold) { //left wall only: increase spd left, decrease spd right
+        ir_error = 2*(g_ir.control_left - cur_ir_left);
+    }
+    else if (cur_ir_right > g_ir.right_wall_threshold) { //right wall only: decrease spd left, increase spd right
+        ir_error = 2*(g_ir.control_right - cur_ir_right);
+    }
+    else { //no walls, can't use IR
+        ir_error = 0;
     }
 
+    SetLeftPWM(g_motor.BASEPWM + ir_error);
+    SetRightPWM(g_motor.BASEPWM - ir_error);
 
 }
 

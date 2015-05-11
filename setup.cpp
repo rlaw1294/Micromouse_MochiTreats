@@ -19,7 +19,8 @@ void debugger() {
   if (time_elapsed_ms > DEBUGGER_PERIOD_MS) { //times 1000 because timer is in microsenconds
     boolean time_elapsed = false;
     boolean ir = false;
-    boolean control_ir = false;
+    boolean ir_control = false;
+    boolean ir_wall_threshold = false;
     boolean motor_speed = true;
     boolean motor_encoders = false;
     boolean maze = false;
@@ -31,7 +32,8 @@ void debugger() {
       Serial1.print(time_elapsed_ms/timer_times_checked);
       Serial1.println();
     }
-    if (control_ir) g_ir.print_control_values();
+    if (ir_control) g_ir.print_control_values();
+    if (ir_wall_threshold) g_ir.print_wall_threshold_values();
     if (ir) g_ir.print_values();
     if (motor_encoders) print_encoder_values();
     if (motor_speed) g_motor.print_motor_values();

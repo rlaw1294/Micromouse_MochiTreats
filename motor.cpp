@@ -93,7 +93,6 @@ void Motor::print_motor_values() {
 
 
 
-/* --- PRIVATES --- */
 void Motor::SetLeftPWM(float pwm) {
   if (pwm > MAXPWM) pwm = MAXPWM;
   else if (pwm < -1*MAXPWM) pwm = -1*MAXPWM;
