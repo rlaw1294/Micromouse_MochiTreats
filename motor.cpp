@@ -3,6 +3,8 @@
 extern Maze g_maze;
 enum direction_facing {NORTH, SOUTH, EAST, WEST};
 
+//extern boolean use_ir_pid;
+//extern boolean use_velocity_pid;
 
 extern int g_motor_left_cw;
 extern int g_motor_left_ccw;
@@ -15,7 +17,7 @@ extern volatile double g_ticks_right;
 extern const double TICKS_ONE_CELL;
 extern const double TICKS_90_TURN;
 
-extern unsigned long motor_velocity_timer_time_ms;
+//extern unsigned long motor_velocity_timer_time_ms;
 
 /* --- PUBLICS --- */
 Motor::Motor()
@@ -31,13 +33,15 @@ void Motor::MoveForward() {
   else { MoveLeftBackward(); }
   if (this->right_pwm >=0) { MoveRightForward(); }
   else { MoveRightBackward(); }
+//  use_ir_pid = true;
+//  use_velocity_pid = true;
   PID();
 }
 
 void Motor::ForwardOneCell() {
   double end_ticks_left = g_ticks_left + TICKS_ONE_CELL;
-  double end_ticks_right = g_ticks_right + TICKS_ONE_CELL;
-  while(g_ticks_left < end_ticks_left || g_ticks_right < end_ticks_right) {
+//  double end_ticks_right = g_ticks_right + TICKS_ONE_CELL;
+  while(g_ticks_left < end_ticks_left) { //|| g_ticks_right < end_ticks_right ... favor left encoder for now..get a pid later for this...also need a tolerance
     MoveForward(); 
   }
   g_maze.update_forwardonecell_position();
@@ -168,6 +172,7 @@ void Motor::RightOff() {
   analogWrite(g_motor_right_cw, 0);
   analogWrite(g_motor_right_ccw, 0);
 }
+
 
 
 

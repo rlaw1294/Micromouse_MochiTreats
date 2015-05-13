@@ -3,23 +3,24 @@
 extern IRSensorReading g_ir;
 extern Motor g_motor;
 
+extern boolean use_ir_pid;
+extern boolean use_velocity_pid;
+
 extern const int g_left_led;
 extern const int g_right_led;
 
-extern int g_encoderLeftA;
-extern int g_encoderLeftB;
-extern int g_encoderRightA;
-extern int g_encoderRightB;
+extern volatile double g_ticks_left;
+extern volatile double g_ticks_right;
 
-static const float Kp_ir = .3;
+static const float Kp_ir = .1;
 static const float Ki_ir = 0;
 static const float Kd_ir = 0;
 
-static const float Kp_v = 0;
+static const float Kp_v = 20;
 static const float Ki_v = 0;
 static const float Kd_v = 0;
 
-static const float pid_timer_dt = 0.01; //polling interval
+static const float pid_timer_dt = .01; //polling interval in ms
 unsigned long pid_timer_ms = 0;
 
 int prev_ir_error = 0;
@@ -34,18 +35,18 @@ void PID() {
     *   IRSensorError = sensorError();
     *   IRSensorErrorInteg += IRSensorError; 
     */
-//    while ((micros()/1000)+pid_timer_ms < pid_timer_dt) {
+    while ((micros()/1000)-pid_timer_ms < pid_timer_dt) {
       //do nothing!!! waiting until correct time slice has passed
-//      Serial.println("GOOD PID IS WAITING\n");
-//    }
-//    pid_timer_ms = micros()/1000;
+//      Serial1.println("GOOD PID IS WAITING\n");
+    }
+    pid_timer_ms = micros()/1000;
     //take in values now so i work with values from same exact time as possible
     int ir_error = 0;
     int cur_ir_left = g_ir.left;
     int cur_ir_right = g_ir.right;
     
-    int cur_encoder_left_ticks = g_encoderLeftA;
-    int cur_encoder_right_ticks = g_encoderRightA;
+    int cur_encoder_left_ticks = g_ticks_left;
+    int cur_encoder_right_ticks = g_ticks_right;
     
     
     //IR PID
@@ -76,18 +77,19 @@ void PID() {
     *   position -> velocity -> acceleration
     *   target velocity is our base speed on our motor class
     */
-    float cur_vel_left = (cur_encoder_left_ticks - prev_encoder_left_ticks)/pid_timer_dt;
-    float cur_vel_right = (cur_encoder_right_ticks - prev_encoder_right_ticks)/pid_timer_dt;
+    float cur_vel_left = (cur_encoder_left_ticks - prev_encoder_left_ticks);
+    float cur_vel_right = (cur_encoder_right_ticks - prev_encoder_right_ticks);
     prev_encoder_left_ticks = cur_encoder_left_ticks;
     prev_encoder_right_ticks = cur_encoder_right_ticks;
-    float v_error_left = g_motor.BASEPWM - cur_vel_right;
-    float v_error_right = g_motor.BASEPWM - cur_vel_right;
+    float v_error = cur_vel_left - cur_vel_right; //left is positive error, right is negative error
     
-//    float total_v_error = Kp_v*v_err
-    
-    g_motor.SetLeftPWM(g_motor.BASEPWM + total_ir_error);
-    g_motor.SetRightPWM(g_motor.BASEPWM - total_ir_error);
+    float total_v_error = Kp_v*v_error;
 
+    if (use_ir_pid == false) total_ir_error = 0;
+    if (use_velocity_pid == false) total_v_error = 0;
+    g_motor.SetLeftPWM(g_motor.BASEPWM + total_ir_error - total_v_error);
+    g_motor.SetRightPWM(g_motor.BASEPWM - total_ir_error + total_v_error);
 }
+
 
 

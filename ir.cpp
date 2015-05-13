@@ -24,7 +24,7 @@ IRSensorReading::IRSensorReading() {
     this->mid_wall_threshold = 0;
     this->right_wall_threshold = 0;
 
-    this->wall_threshold = 0;
+    this->wall_threshold = 0; 
 }
 
 void IRSensorReading::ir_pulse() {
@@ -93,6 +93,7 @@ void IRSensorReading::print_wall_threshold_values() {
     Serial1.print(this->right_wall_threshold);
     Serial1.println();
 }
+
 
 
 

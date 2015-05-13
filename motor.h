@@ -33,7 +33,6 @@ class Motor {
 
       void MoveLeftForward();
       void MoveRightForward();
-            
       void MoveLeftBackward();
       void MoveRightBackward();
 
@@ -45,4 +44,5 @@ class Motor {
 };
 
 #endif
+
 

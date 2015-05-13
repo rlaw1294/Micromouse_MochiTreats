@@ -1,16 +1,35 @@
 #include "setup.h"
 
 /* --- GLOBALS ---- */
-IRSensorReading g_ir;
-Motor g_motor;
-Maze g_maze;
+extern IRSensorReading g_ir;
+extern Motor g_motor;
+extern Maze g_maze;
 
+//IR
+extern const int IR_PULSE_RATE = 500; //microseconds
+
+//Motor
+
+//Encoders
+volatile double g_ticks_left = 0;
+volatile double g_ticks_right = 0;
+extern const double TICKS_ONE_CELL = 1650;
+extern const double TICKS_90_TURN = 500;
+
+//Maze
+
+//PID
+extern boolean use_ir_pid = true;
+extern boolean use_velocity_pid = true;
+
+
+/* --- DEBUGGER --- */
 //DEBUGGER + TIMER INTERRUPT
 void timer_interrupt() {
   g_ir.ir_pulse();
 }
 
-const long DEBUGGER_PERIOD_MS = 500;
+const long DEBUGGER_PERIOD_MS = 250;
 long debugger_timer_time = 0;
 int timer_times_checked = 0;
 void debugger() {
@@ -21,10 +40,10 @@ void debugger() {
     boolean ir = false;
     boolean ir_control = false;
     boolean ir_wall_threshold = false;
-    boolean motor_speed = true;
+    boolean motor_speed = false;
     boolean motor_encoders = false;
     boolean maze = false;
-    boolean maze_traversed = false;
+    boolean maze_traversed = true;
     boolean maze_position = false;
 
     if (time_elapsed) {
@@ -45,20 +64,6 @@ void debugger() {
     debugger_timer_time = millis();
   }
 }
-
-//IR
-extern const int IR_PULSE_RATE = 500;
-
-//Motor
-extern unsigned long motor_velocity_timer_time_ms = 0;
-
-//Encoders
-volatile double g_ticks_left = 0;
-volatile double g_ticks_right = 0;
-extern const double TICKS_ONE_CELL = 1650;
-extern const double TICKS_90_TURN = 500;
-
-//Maze
 
 
 /* --- PINOUTS --- */
@@ -147,4 +152,5 @@ void set_pinmodes() {
   Serial.begin(9600);
   Serial1.begin(9600);
 }
+
 

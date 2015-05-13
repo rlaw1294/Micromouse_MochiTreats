@@ -2,7 +2,7 @@
 #define IR_H
 
 #include <Arduino.h>
-#include <TimerOne.h>
+#include "TimerOne.h"
 
 class IRSensorReading {
   public:
@@ -41,5 +41,6 @@ class IRSensorReading {
 };
 
 #endif
+
 
 
