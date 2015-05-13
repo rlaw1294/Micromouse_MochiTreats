@@ -1,9 +1,9 @@
 #include "setup.h"
 
 /* --- GLOBALS ---- */
- IRSensorReading g_ir;
- Motor g_motor;
- Maze g_maze;
+IRSensorReading g_ir;
+Motor g_motor;
+Maze g_maze;
 
 //IR
 extern const int IR_PULSE_RATE = 500; //microseconds
@@ -13,8 +13,8 @@ extern const int IR_PULSE_RATE = 500; //microseconds
 //Encoders
 volatile double g_ticks_left = 0;
 volatile double g_ticks_right = 0;
-extern const double TICKS_ONE_CELL = 1650;
-extern const double TICKS_90_TURN = 500;
+extern const double TICKS_ONE_CELL = 1500;
+extern const double TICKS_90_TURN = 450;
 
 //Maze
 
@@ -43,7 +43,7 @@ void debugger() {
     boolean motor_speed = false;
     boolean motor_encoders = false;
     boolean maze = false;
-    boolean maze_traversed = true;
+    boolean maze_traversed = false;
     boolean maze_position = false;
 
     if (time_elapsed) {
@@ -123,7 +123,7 @@ void set_pinmodes() {
   Timer1.initialize(IR_PULSE_RATE); //500 microseconds.... 1000microseconds per milisecond
   Timer1.start();  
   Timer1.attachInterrupt(timer_interrupt); //lul so cheap! ><"!... i hate this
-  delay(1500);
+  delay(3000);
   g_ir.reset_control_values();
   
   //ir phototransistors

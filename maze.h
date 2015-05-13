@@ -32,6 +32,7 @@ class Maze {
 		void print_maze();
 		void print_maze_position();
 		void print_maze_traversed();
+                void print_cur_cell();
 
 		// void update_maze_position();
 		void update_forwardonecell_position();

@@ -30,7 +30,8 @@ void Cell::print_cell(){
 Maze::Maze() {
 	this->index_x = 0;
 	this->index_y = 15;
-        this->mouse_direction = NORTH;
+        this->mouse_direction = SOUTH;
+        this->maze[index_y][index_x].traversed = 1;
 }
 
 // void Maze::update_position(int index_x, int index_y) {
@@ -41,25 +42,23 @@ Maze::Maze() {
 void Maze::update_forwardonecell_position() { //also updates traversed
 	int new_index_x = index_x;
 	int new_index_y = index_y;
-	maze[index_y][index_x].traversed = true;
 
-
-	if (mouse_direction == NORTH && this->index_y > 0) { 
-		new_index_y = this->index_y - 1; 
+	if (mouse_direction == NORTH && new_index_y > 0) { 
+		new_index_y -= 1; 
 	}
-	else if(mouse_direction == SOUTH && this->index_y < 15) {
-		new_index_y = this->index_y + 1;
+	else if(mouse_direction == SOUTH && new_index_y < 15) {
+		new_index_y += 1;
 	}
-	else if(mouse_direction == EAST && this->index_x < 15) {
-		new_index_x = this->index_x + 1;
+	else if(mouse_direction == EAST && new_index_x < 15) {
+		new_index_x += 1;
 	}
-	else if(mouse_direction == WEST && this->index_x > 0) { 
-		new_index_x = this->index_x - 1;
+	else if(mouse_direction == WEST && new_index_x > 0) { 
+		new_index_x -= 1;
 	}
-
 
     this->index_x = new_index_x;
     this->index_y = new_index_y;
+    maze[index_y][index_x].traversed = true;
 }
 
 void Maze::update_turn90left_direction() {
@@ -132,7 +131,10 @@ void Maze::print_maze_position() {
         Serial1.print(this->index_y);
         Serial1.println();
         Serial1.print("Direction: ");
-        Serial1.print(this->mouse_direction);
+        if (this->mouse_direction==NORTH) Serial1.print("N");
+        else if (this->mouse_direction==EAST) Serial1.print("E");
+        else if (this->mouse_direction==SOUTH) Serial1.print("S");
+        else if (this->mouse_direction==WEST) Serial1.print("W");
         Serial1.println(); 
 //	for(int y = 0; y < 16; ++y){ //row
 //		for(int x = 0; x < 16; ++x){ //column
@@ -156,10 +158,10 @@ void Maze::print_maze_traversed() {
 	Serial1.println();
 }
 
+void Maze::print_cur_cell() {
+  this->maze[index_y][index_x].print_cell();
+}
+
 void Maze::print_maze(){
 	return;
 }
-
-
-
-

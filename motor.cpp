@@ -40,11 +40,18 @@ void Motor::MoveForward() {
 
 void Motor::ForwardOneCell() {
   double end_ticks_left = g_ticks_left + TICKS_ONE_CELL;
+  double midway_point_ticks = g_ticks_left + TICKS_ONE_CELL/2;
+  boolean maze_halfwaypoint_updated = 0;
 //  double end_ticks_right = g_ticks_right + TICKS_ONE_CELL;
   while(g_ticks_left < end_ticks_left) { //|| g_ticks_right < end_ticks_right ... favor left encoder for now..get a pid later for this...also need a tolerance
-    MoveForward(); 
+    MoveForward();
+    if (g_ticks_left >= midway_point_ticks-50 && g_ticks_left <= midway_point_ticks+50 && !maze_halfwaypoint_updated) {
+      g_maze.update_forwardonecell_position();
+      g_maze.maze_update_wall_sides();
+      maze_halfwaypoint_updated = 1;
+    }
+    g_maze.maze_update_wall_middle();
   }
-  g_maze.update_forwardonecell_position();
   Off();
 //  delay(1000);
 }
@@ -55,6 +62,7 @@ void Motor::Turn90Left() {
   while(g_ticks_left > end_ticks_left || g_ticks_right < end_ticks_right) {
     SpinLeft(); 
   }
+  g_maze.update_turn90left_direction();
   Off();
 //  Serial1.println("Spun 90 left");
 }
@@ -65,6 +73,7 @@ void Motor::Turn90Right() {
   while(g_ticks_left < end_ticks_left || g_ticks_right > end_ticks_right) {
     SpinRight();
   }
+  g_maze.update_turn90right_direction();
   Off();
 //  Serial1.println("Spun 90 right");
 }

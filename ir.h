@@ -2,6 +2,7 @@
 #define IR_H
 
 #include <Arduino.h>
+#include "setup.h"
 #include "TimerOne.h"
 
 class IRSensorReading {
