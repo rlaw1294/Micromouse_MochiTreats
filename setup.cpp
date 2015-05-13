@@ -1,9 +1,9 @@
 #include "setup.h"
 
 /* --- GLOBALS ---- */
-extern IRSensorReading g_ir;
-extern Motor g_motor;
-extern Maze g_maze;
+ IRSensorReading g_ir;
+ Motor g_motor;
+ Maze g_maze;
 
 //IR
 extern const int IR_PULSE_RATE = 500; //microseconds

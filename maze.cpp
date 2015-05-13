@@ -2,7 +2,7 @@
 
 enum direction_facing {NORTH, SOUTH, EAST, WEST};
 
-IRSensorReading g_ir;
+extern IRSensorReading g_ir;
 
 Cell::Cell() {
 	this->north = 0;	
