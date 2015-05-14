@@ -12,11 +12,11 @@ extern const int g_right_led;
 extern volatile double g_ticks_left;
 extern volatile double g_ticks_right;
 
-static const float Kp_ir = .1;
+static const float Kp_ir = .15;
 static const float Ki_ir = 0;
 static const float Kd_ir = 0;
 
-static const float Kp_v = 20;
+static const float Kp_v = 25;
 static const float Ki_v = 0;
 static const float Kd_v = 0;
 
@@ -83,11 +83,18 @@ void PID() {
     prev_encoder_right_ticks = cur_encoder_right_ticks;
     float v_error = cur_vel_left - cur_vel_right; //left is positive error, right is negative error
     
+    //set_vel = 400 ticks; //pick a good speed
+    //v_error_L = KpL*(set_vel - cur_vel_left)
+    //v_error_R = KpR*(set_vel - cur_vel_right)
+    //you don't need total 
     float total_v_error = Kp_v*v_error;
 
     if (use_ir_pid == false) total_ir_error = 0;
     if (use_velocity_pid == false) total_v_error = 0;
     g_motor.SetLeftPWM(g_motor.BASEPWM + total_ir_error - total_v_error);
+    //g_motor.SetLeftPWM(total_ir_error - v_error_L);
+    //g_motor.SetRightPWM(total_ir_error - v_error_R);
+    
     g_motor.SetRightPWM(g_motor.BASEPWM - total_ir_error + total_v_error);
 }
 

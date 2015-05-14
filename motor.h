@@ -22,6 +22,9 @@ class Motor {
       
       void Off();
       
+      void RepositionWithFrontMiddleWall();
+      
+      
       void test_motor();
       void print_motor_values();
       

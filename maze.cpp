@@ -13,25 +13,16 @@ Cell::Cell() {
 	this->dist = -1;
 }
 
-void Cell::print_cell(){
-	Serial1.print(" N: ");
-	Serial1.print(north);
-	Serial1.print(" S: ");
-	Serial1.print(south);
-	Serial1.print(" W: ");
-	Serial1.print(west);
-	Serial1.print(" E: ");
-	Serial1.print(east);
-	Serial1.println();
-}
-
-
 
 Maze::Maze() {
 	this->index_x = 0;
 	this->index_y = 15;
         this->mouse_direction = SOUTH;
         this->maze[index_y][index_x].traversed = 1;
+        
+        this->maze[15][0].south = 1;
+        this->maze[15][0].west = 1;
+        this->maze[15][0].east = 1;
 }
 
 // void Maze::update_position(int index_x, int index_y) {
@@ -78,7 +69,7 @@ void Maze::update_turn90right_direction() {
 }
 
 void Maze::maze_update_wall_sides() {
-  float wall_tolerance = 10;
+  float wall_tolerance = 75;
    if (g_ir.left > g_ir.left_wall_threshold - wall_tolerance) { //left wall
      if (this->mouse_direction == NORTH) { (this->maze[this->index_y][this->index_x]).west = 1; }
      else if (this->mouse_direction == EAST) { (this->maze[this->index_y][this->index_x]).north = 1; }
@@ -106,8 +97,17 @@ void Maze::maze_update_wall_sides() {
    }
 }
 
+void Maze::maze_update_wall_front() {
+  //this function should only be called if we already know there is a wall in front
+   if (this->mouse_direction == NORTH) { (this->maze[this->index_y][this->index_x]).north = 1; }
+   else if (this->mouse_direction == EAST) { (this->maze[this->index_y][this->index_x]).east = 1; }
+   else if (this->mouse_direction == SOUTH) { (this->maze[this->index_y][this->index_x]).south = 1; }
+   else if (this->mouse_direction == WEST) { (this->maze[this->index_y][this->index_x]).west = 1; }  
+}
+
+//don't use this...prone to error
 void Maze::maze_update_wall_middle() {
-   float wall_tolerance = 10;
+   float wall_tolerance = 50;
    if (g_ir.mid > g_ir.right_wall_threshold - wall_tolerance) { //middle wall
      if (this->mouse_direction == NORTH) { (this->maze[this->index_y][this->index_x]).north = 1; }
      else if (this->mouse_direction == EAST) { (this->maze[this->index_y][this->index_x]).east = 1; }
@@ -122,6 +122,34 @@ void Maze::maze_update_wall_middle() {
    }
 }
 
+boolean Maze::is_cur_wall_right() {
+     if (this->mouse_direction == NORTH && (this->maze[this->index_y][this->index_x]).east == 1) return true;
+     else if (this->mouse_direction == EAST && (this->maze[this->index_y][this->index_x]).south == 1) return true;
+     else if (this->mouse_direction == SOUTH && (this->maze[this->index_y][this->index_x]).west == 1) return true;
+     else if (this->mouse_direction == WEST && (this->maze[this->index_y][this->index_x]).north == 1) return true;
+     else return false;
+}
+boolean Maze::is_cur_wall_left() {
+     if (this->mouse_direction == NORTH && (this->maze[this->index_y][this->index_x]).west == 1) return true;
+     else if (this->mouse_direction == EAST && (this->maze[this->index_y][this->index_x]).north == 1) return true;
+     else if (this->mouse_direction == SOUTH && (this->maze[this->index_y][this->index_x]).east == 1) return true;
+     else if (this->mouse_direction == WEST && (this->maze[this->index_y][this->index_x]).south == 1) return true;
+     else return false;
+}  
+boolean Maze::is_cur_wall_front() {
+     if (this->mouse_direction == NORTH && (this->maze[this->index_y][this->index_x]).north == 1) return true;
+     else if (this->mouse_direction == EAST && (this->maze[this->index_y][this->index_x]).east == 1) return true;
+     else if (this->mouse_direction == SOUTH && (this->maze[this->index_y][this->index_x]).south == 1) return true;
+     else if (this->mouse_direction == WEST && (this->maze[this->index_y][this->index_x]).west == 1) return true;
+     else return false;
+}
+boolean Maze::is_cur_wall_back() {
+     if (this->mouse_direction == NORTH && (this->maze[this->index_y][this->index_x]).south == 1) return true;
+     else if (this->mouse_direction == EAST && (this->maze[this->index_y][this->index_x]).west == 1) return true;
+     else if (this->mouse_direction == SOUTH && (this->maze[this->index_y][this->index_x]).north == 1) return true;
+     else if (this->mouse_direction == WEST && (this->maze[this->index_y][this->index_x]).east == 1) return true;
+     else return false;  
+}
 
 void Maze::print_maze_position() {
 	Serial1.println("==== POSITION ====");
@@ -131,10 +159,10 @@ void Maze::print_maze_position() {
         Serial1.print(this->index_y);
         Serial1.println();
         Serial1.print("Direction: ");
-        if (this->mouse_direction==NORTH) Serial1.print("N");
-        else if (this->mouse_direction==EAST) Serial1.print("E");
+        if (this->mouse_direction==WEST) Serial1.print("W");
+        else if (this->mouse_direction==NORTH) Serial1.print("N");
         else if (this->mouse_direction==SOUTH) Serial1.print("S");
-        else if (this->mouse_direction==WEST) Serial1.print("W");
+        else if (this->mouse_direction==EAST) Serial1.print("E");
         Serial1.println(); 
 //	for(int y = 0; y < 16; ++y){ //row
 //		for(int x = 0; x < 16; ++x){ //column
@@ -158,8 +186,61 @@ void Maze::print_maze_traversed() {
 	Serial1.println();
 }
 
+void Maze::print_maze_walls_cur_cell() {
+  Serial1.print("WNSE: ");
+  if (maze[index_y][index_x].west) Serial1.print("1");
+  else Serial1.print("0");
+  if (maze[index_y][index_x].north) Serial1.print("1");
+  else Serial1.print("0");
+  if (maze[index_y][index_x].south) Serial1.print("1");
+  else Serial1.print("0");
+  if (maze[index_y][index_x].east) Serial1.print("1");
+  else Serial1.print("0");  
+  Serial1.println();
+}
+
+void Maze::print_cell(int x, int y) {
+/* 
+   WALL    *
+   NO WALL `
+   NORTH   ^
+   WEST    <
+   SOUTH   V
+   EAST    >
+   DIST   ##
+   ex)
+  ***
+ ` > *
+ ` 34*
+  ```
+*/
+  if(maze[y][x].north) Serial1.print(" *** \n");
+  else Serial1.print(" ``` \n");
+  
+  if(maze[y][x].west) Serial1.print("*");
+  else Serial1.print("'");
+  if (this->index_y==y && this->index_x==x) {
+    if (this->mouse_direction==NORTH) Serial1.print("^ ");
+    else if (this->mouse_direction==EAST) Serial1.print("> ");
+    else if (this->mouse_direction==SOUTH) Serial1.print("< ");
+    else if (this->mouse_direction==WEST) Serial1.print("V ");
+  }
+  if(maze[y][x].east) Serial1.print("*\n");
+  else Serial1.print("'\n");
+  
+  if(maze[y][x].west) Serial1.print("*");
+  else Serial1.print("'");
+  Serial1.print(this->maze[y][x].dist/10);
+  Serial1.print(this->maze[y][x].dist%10);
+  if(maze[y][x].east) Serial1.print("*\n");
+  else Serial1.print("'\n");  
+  
+  if(maze[y][x].south) Serial1.print(" *** \n");
+  else Serial1.print(" ''' \n");  
+}
+
 void Maze::print_cur_cell() {
-  this->maze[index_y][index_x].print_cell();
+  print_cell(index_x, index_y);
 }
 
 void Maze::print_maze(){

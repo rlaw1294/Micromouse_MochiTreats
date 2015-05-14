@@ -5,6 +5,7 @@
 #include "setup.h"
 #include "TimerOne.h"
 
+
 class IRSensorReading {
   public:
     //variables

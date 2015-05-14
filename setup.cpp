@@ -13,8 +13,8 @@ extern const int IR_PULSE_RATE = 500; //microseconds
 //Encoders
 volatile double g_ticks_left = 0;
 volatile double g_ticks_right = 0;
-extern const double TICKS_ONE_CELL = 1500;
-extern const double TICKS_90_TURN = 450;
+extern const double TICKS_ONE_CELL = 1625;
+extern const double TICKS_90_TURN = 500;
 
 //Maze
 
@@ -44,7 +44,9 @@ void debugger() {
     boolean motor_encoders = false;
     boolean maze = false;
     boolean maze_traversed = false;
-    boolean maze_position = false;
+    boolean maze_position = true;
+    boolean maze_walls_cur_cell = true;
+    boolean maze_cur_cell = false; //pretty crappy right now
 
     if (time_elapsed) {
       Serial1.print("Time Elapsed (ms):");
@@ -59,6 +61,8 @@ void debugger() {
     if (maze) g_maze.print_maze();
     if (maze_traversed) g_maze.print_maze_traversed();
     if (maze_position) g_maze.print_maze_position();
+    if (maze_walls_cur_cell) g_maze.print_maze_walls_cur_cell();
+    if (maze_cur_cell) g_maze.print_cur_cell();
     
     timer_times_checked = 0;
     debugger_timer_time = millis();

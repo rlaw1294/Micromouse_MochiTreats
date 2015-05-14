@@ -7,6 +7,7 @@
 #include "maze.h"
 #include <Arduino.h>
 #include "TimerOne.h"
+#include "drivesm.h"
 
 void set_pinmodes();
 void timer_interrupt();

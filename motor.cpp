@@ -1,6 +1,7 @@
 #include "motor.h"
 
 extern Maze g_maze;
+extern IRSensorReading g_ir;
 enum direction_facing {NORTH, SOUTH, EAST, WEST};
 
 //extern boolean use_ir_pid;
@@ -50,7 +51,12 @@ void Motor::ForwardOneCell() {
       g_maze.maze_update_wall_sides();
       maze_halfwaypoint_updated = 1;
     }
-    g_maze.maze_update_wall_middle();
+    if (g_ir.mid > g_ir.control_mid) {
+//        RepositionWithFrontMiddleWall();
+      g_maze.maze_update_wall_front();
+      break;
+    }
+//    g_maze.maze_update_wall_middle(); //prone to error, use another method
   }
   Off();
 //  delay(1000);
@@ -82,6 +88,64 @@ void Motor::Off() {
     LeftOff();
     RightOff();
 }
+
+
+/* RepositionWithFrontMiddleWall()
+Back up to control vals
+turn 180
+back up to wall
+move up a bit
+turn 180
+back up to control vals
+move up to control vals
+*/
+void Motor::RepositionWithFrontMiddleWall() {
+  while(g_ir.mid > g_ir.control_mid) { //back up to control vals
+    SetLeftPWM(-.5*BASEPWM);
+    SetRightPWM(-.5*BASEPWM);
+    MoveLeftBackward();
+    MoveRightBackward();
+  }
+  Off();
+//  
+//  Turn90Left(); //turn 180
+//  Turn90Left();
+//  
+//  SetLeftPWM(-.5*BASEPWM); //back up to wall
+//  SetRightPWM(-.5*BASEPWM);
+//  MoveLeftBackward();
+//  MoveRightBackward();  
+//  delay(1250);
+//  Off();
+//  
+//  double end_ticks_left = g_ticks_left + 400; //move up a bit
+//  while(g_ticks_left < end_ticks_left) {
+//    SetLeftPWM(.5*BASEPWM);
+//    SetRightPWM(.5*BASEPWM);
+//    MoveForward();
+//  }
+//  Off();
+//  
+//  Turn90Left(); //turn 180
+//  Turn90Left();
+//  
+//  end_ticks_left = g_ticks_left - 400;
+//  while(g_ir.mid > g_ir.control_mid) { //back up to control vals
+//    SetLeftPWM(-.5*BASEPWM);
+//    SetRightPWM(-.5*BASEPWM);
+//    MoveLeftBackward();
+//    MoveRightBackward();
+//  }
+//  Off();
+//  while(g_ir.mid > g_ir.control_mid) { //move up to control vals
+//    SetLeftPWM(.5*BASEPWM);
+//    SetRightPWM(.5*BASEPWM);
+//    MoveForward();
+//  }
+//  Off();  
+}
+
+/* CAN IGNORE FOR THE MOST PART */
 
 void Motor::test_motor() {
   ForwardOneCell();
