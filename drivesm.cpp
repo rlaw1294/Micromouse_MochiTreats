@@ -7,12 +7,10 @@ enum drive_right_wall_SM_states {INITDRIVERIGHT, FORWARD, TURN90R, TURN90RFORWAR
 static int drive_right_wall_SM_state = INITDRIVERIGHT;
 
 void drive_right_wall_SM() {
-	int next_state;
-
 	//transition
 	switch(drive_right_wall_SM_state) {
 	    case INITDRIVERIGHT:
-	    	next_state = INITDRIVERIGHT;
+	    	drive_right_wall_SM_state = INITDRIVERIGHT;
 	    	break;
 	    case FORWARD:
                 if (!g_maze.is_cur_wall_left() && (millis()%2==0)) drive_right_wall_SM_state=TURN90LFORWARD;
@@ -79,4 +77,38 @@ void drive_right_wall_SM() {
 
 
 
+enum drive_straight_only_SM_states {SOINIT, SOFORWARD};
+static int drive_straight_only_SM_state = SOINIT;
+
+void drive_straight_only_SM() {
+
+	//transition
+	switch(drive_right_wall_SM_state) {
+	    case SOINIT:
+	    	drive_straight_only_SM_state = SOINIT;
+	    	break;
+	    case SOFORWARD:
+                drive_straight_only_SM_state=SOFORWARD;
+	    	break;
+	    default:
+	    	break;
+	    };
+
+	//action
+	switch(drive_right_wall_SM_state) {
+	    case SOINIT:
+//                g_motor.Turn90Left();
+//                g_motor.Turn90Left();
+                drive_right_wall_SM_state=SOFORWARD;
+                delay(500);
+	    	break;
+	    case SOFORWARD:
+	    	g_motor.ForwardOneCell();
+                debugger();
+                delay(500);
+	    	break;
+	    default:
+	    	break;
+	    };
+}
 

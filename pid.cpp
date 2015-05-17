@@ -12,43 +12,56 @@ extern const int g_right_led;
 extern volatile double g_ticks_left;
 extern volatile double g_ticks_right;
 
-static const float Kp_ir = .15;
-static const float Ki_ir = 0;
-static const float Kd_ir = 0;
+static const double pid_timer_dt = 5; //polling interval in ms
+static double cur_pid_timer_ms = 0;
+static double prev_pid_timer_ms = 0;
 
-static const float Kp_v = 25;
-static const float Ki_v = 0;
-static const float Kd_v = 0;
-
-static const float pid_timer_dt = .01; //polling interval in ms
-unsigned long pid_timer_ms = 0;
+//FOR IR CONTROL
+static const double Kp_ir = 0;
+static const double Ki_ir = 0;
+static const double Kd_ir = 0;
 
 int prev_ir_error = 0;
 float integ_ir_error = 0;
-int prev_encoder_left_ticks = 0;
-int prev_encoder_right_ticks = 0;
-float integ_v_error = 0;
+
+//FOR VELOCITY CONTROL - 13, 1, 0
+static const double Kp_v = 13; //get to sp without too much oscillation asap
+static const double Ki_v = 1; //<1, super small
+static const double Kd_v = 0; //*5 to 20
+static const double SETPOINT_V = 1600/1000*pid_timer_dt; //Ticks per ms = ticks/sec * (sec/1000ms)
+
+static int cur_encoder_left_ticks = 0;
+static int cur_encoder_right_ticks = 0;
+static int prev_encoder_left_ticks = 0;
+static int prev_encoder_right_ticks = 0;
+static double prev_v_error_left = 0;
+static double prev_v_error_right = 0;
+static double integ_v_error_left = 0;
+static double integ_v_error_right = 0;
 
 void PID() {
     /* IR PID */
     /**
     *   IRSensorError = sensorError();
-    *   IRSensorErrorInteg += IRSensorError; 
+    *   IRSensorErrorInteg += IRSensorError;
     */
-    while ((micros()/1000)-pid_timer_ms < pid_timer_dt) {
+//    cur_pid_timer_ms = (double)micros()/(double)1000;
+    while (((double)micros()/(double)1000 - prev_pid_timer_ms) < pid_timer_dt) {
       //do nothing!!! waiting until correct time slice has passed
 //      Serial1.println("GOOD PID IS WAITING\n");
+//        Serial1.println((double)micros()/(double)1000 - prev_pid_timer_ms);
+//        Serial1.print("AT+BAUD8"); //rex says to look into this :3
     }
-    pid_timer_ms = micros()/1000;
+    prev_pid_timer_ms = (double)micros()/(double)1000;
     //take in values now so i work with values from same exact time as possible
     int ir_error = 0;
     int cur_ir_left = g_ir.left;
     int cur_ir_right = g_ir.right;
     
-    int cur_encoder_left_ticks = g_ticks_left;
-    int cur_encoder_right_ticks = g_ticks_right;
-    
-    
+    cur_encoder_left_ticks = g_ticks_left;
+    cur_encoder_right_ticks = g_ticks_right;
+
+
     //IR PID
     if (cur_ir_left > g_ir.left_wall_threshold && cur_ir_right > g_ir.right_wall_threshold) { //both walls
         ir_error = cur_ir_left - cur_ir_right; //left - right
@@ -71,31 +84,39 @@ void PID() {
     int total_ir_error = Kp_ir*ir_error + Ki_ir*integ_ir_error + Kd_ir*deriv_ir_error;
     
     
-    //Velocity PID - DISABLE THIS DURING A TURN?! AND DURING A STOP!!!!
-    //if (!NOT TURN)
+    //Velocity PID
     /** velocity is the derivative of position...
     *   position -> velocity -> acceleration
     *   target velocity is our base speed on our motor class
     */
-    float cur_vel_left = (cur_encoder_left_ticks - prev_encoder_left_ticks);
-    float cur_vel_right = (cur_encoder_right_ticks - prev_encoder_right_ticks);
-    prev_encoder_left_ticks = cur_encoder_left_ticks;
-    prev_encoder_right_ticks = cur_encoder_right_ticks;
-    float v_error = cur_vel_left - cur_vel_right; //left is positive error, right is negative error
+    double cur_vel_left = (cur_encoder_left_ticks - prev_encoder_left_ticks);// /pid_timer_dt;
+    double cur_vel_right = (cur_encoder_right_ticks - prev_encoder_right_ticks);// /pid_timer_dt;
+    prev_encoder_left_ticks = g_ticks_left;
+    prev_encoder_right_ticks = g_ticks_right;    
+//    Serial1.println(cur_vel_left); //use to debug, make sure it matches setpoint well
     
-    //set_vel = 400 ticks; //pick a good speed
-    //v_error_L = KpL*(set_vel - cur_vel_left)
-    //v_error_R = KpR*(set_vel - cur_vel_right)
-    //you don't need total 
-    float total_v_error = Kp_v*v_error;
+    //get error
+    double v_error_left = cur_vel_left - SETPOINT_V;
+    double v_error_right = cur_vel_right - SETPOINT_V;
+    
+    
+    //integral and derivative error
+    integ_v_error_left += v_error_left;
+    integ_v_error_right += v_error_right;
+    double deriv_v_error_left = v_error_left - prev_v_error_left;
+    double deriv_v_error_right = v_error_right - prev_v_error_right;
+    prev_v_error_left = v_error_left;
+    prev_v_error_right = v_error_right;
+    
+    //total error
+    double total_v_error_left = Kp_v*v_error_left + Ki_v*integ_v_error_left + Kd_v*deriv_v_error_left;
+    double total_v_error_right = Kp_v*v_error_right + Ki_v*integ_v_error_right + Kd_v*deriv_v_error_right;
 
-    if (use_ir_pid == false) total_ir_error = 0;
-    if (use_velocity_pid == false) total_v_error = 0;
-    g_motor.SetLeftPWM(g_motor.BASEPWM + total_ir_error - total_v_error);
-    //g_motor.SetLeftPWM(total_ir_error - v_error_L);
-    //g_motor.SetRightPWM(total_ir_error - v_error_R);
-    
-    g_motor.SetRightPWM(g_motor.BASEPWM - total_ir_error + total_v_error);
+
+//    if (use_ir_pid == false) total_ir_error = 0;
+//    if (use_velocity_pid == false) { total_v_error_left = 0; total_v_error_right = 0; }
+    g_motor.SetLeftPWM(total_ir_error - total_v_error_left);
+    g_motor.SetRightPWM(-1*total_ir_error - total_v_error_right);
 }
 
 

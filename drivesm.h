@@ -8,6 +8,7 @@
 #include "maze.h"
 
 void drive_right_wall_SM();
+void drive_straight_only_SM();
 
 #endif
 

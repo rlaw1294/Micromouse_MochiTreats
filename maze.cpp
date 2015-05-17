@@ -69,7 +69,7 @@ void Maze::update_turn90right_direction() {
 }
 
 void Maze::maze_update_wall_sides() {
-  float wall_tolerance = 75;
+  float wall_tolerance = 50;
    if (g_ir.left > g_ir.left_wall_threshold - wall_tolerance) { //left wall
      if (this->mouse_direction == NORTH) { (this->maze[this->index_y][this->index_x]).west = 1; }
      else if (this->mouse_direction == EAST) { (this->maze[this->index_y][this->index_x]).north = 1; }

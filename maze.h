@@ -45,6 +45,8 @@ class Maze {
 		void update_forwardonecell_position();
                 void update_turn90left_direction();
                 void update_turn90right_direction();
+                
+                //updating walls
                 void maze_update_wall_sides();
                 void maze_update_wall_front();
                 void maze_update_wall_middle();

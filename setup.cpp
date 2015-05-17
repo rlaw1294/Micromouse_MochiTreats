@@ -13,7 +13,7 @@ extern const int IR_PULSE_RATE = 500; //microseconds
 //Encoders
 volatile double g_ticks_left = 0;
 volatile double g_ticks_right = 0;
-extern const double TICKS_ONE_CELL = 1625;
+extern const double TICKS_ONE_CELL = 1500;
 extern const double TICKS_90_TURN = 500;
 
 //Maze
@@ -29,23 +29,23 @@ void timer_interrupt() {
   g_ir.ir_pulse();
 }
 
-const long DEBUGGER_PERIOD_MS = 250;
+const long DEBUGGER_PERIOD_MS = 100;
 long debugger_timer_time = 0;
 int timer_times_checked = 0;
 void debugger() {
   timer_times_checked += 1;
   long time_elapsed_ms = millis() - debugger_timer_time;
   if (time_elapsed_ms > DEBUGGER_PERIOD_MS) { //times 1000 because timer is in microsenconds
-    boolean time_elapsed = false;
+    boolean time_elapsed = true;
     boolean ir = false;
     boolean ir_control = false;
     boolean ir_wall_threshold = false;
     boolean motor_speed = false;
-    boolean motor_encoders = false;
+    boolean motor_encoders = true;
     boolean maze = false;
     boolean maze_traversed = false;
-    boolean maze_position = true;
-    boolean maze_walls_cur_cell = true;
+    boolean maze_position = false;
+    boolean maze_walls_cur_cell = false;
     boolean maze_cur_cell = false; //pretty crappy right now
 
     if (time_elapsed) {

@@ -16,45 +16,8 @@ void setup() {
 }
 
 void loop() {
-  drive_right_wall_SM();
-//  delay(1000);
-//  g_motor.Turn90Left();
-//  debugger();
-//  delay(1000);
-//  g_motor.Turn90Left();
-//  debugger();
-//    delay(1000);
-//  g_motor.ForwardOneCell();
-//  debugger();
-//    delay(1000);
-//  g_motor.ForwardOneCell();
-//  debugger();
-//    delay(1000);
-//  g_motor.ForwardOneCell();
-//  debugger();
-//    delay(1000);
-//  g_motor.ForwardOneCell();
-//  debugger();
-//    delay(1000);
-//  g_motor.ForwardOneCell();
-//  debugger();
-//    delay(1000);    
-//  g_motor.ForwardOneCell();
-//  debugger();
-//    delay(1000);    
-//  g_motor.Turn90Right();
-//  debugger();
-//    delay(1000);
-//  g_motor.ForwardOneCell();
-//  debugger();
-//    delay(1000);
-//  g_motor.Turn90Left();
-//  debugger();
-//    delay(1000);    
-//  g_motor.ForwardOneCell();
-//  debugger();
-//  delay(10000);
-//debugger();
+//  drive_right_wall_SM();
+  drive_straight_only_SM();
 }
 
 

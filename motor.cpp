@@ -54,12 +54,11 @@ void Motor::ForwardOneCell() {
     if (g_ir.mid > g_ir.control_mid) {
 //        RepositionWithFrontMiddleWall();
       g_maze.maze_update_wall_front();
-      break;
+//      break;
     }
 //    g_maze.maze_update_wall_middle(); //prone to error, use another method
   }
   Off();
-//  delay(1000);
 }
 
 void Motor::Turn90Left() {
