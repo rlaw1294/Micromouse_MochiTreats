@@ -5,6 +5,19 @@
 #include <Arduino.h>
 #include "setup.h"
 
+//#include <iostream>
+//#include <vector>
+//#include <string.h>
+#include <queue>
+
+using namespace std;
+
+
+
+struct Coord
+{
+    int x, y;
+};
 
 class Cell {
 	public:
@@ -55,6 +68,13 @@ class Maze {
                 void maze_update_wall_front();
                 void maze_update_wall_middle();
                 void maze_reset_cur_cell_walls();
+                
+                //Maze Solving
+//                void BFShelper( int nmaze[16][16], int x, int y, int v, queue<Coord>& c );
+//                Coord nextCellRecurse( int x, int y );
+//                Coord nextCell( );
+//                void BFS();
+//                void print_nice_maze();
 };
 
 #endif

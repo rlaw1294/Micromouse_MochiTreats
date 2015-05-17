@@ -24,11 +24,11 @@ void loop() {
     debugger();
   }
   else if (g_settings_decision==1) {
-//    drive_right_wall_SM();
+    drive_left_wall_SM();
     debugger();
   }
   else if (g_settings_decision==2) {
-    drive_straight_only_SM();
+    drive_straight_only_SM();  
     debugger();
   }
   else {
