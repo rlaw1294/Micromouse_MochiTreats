@@ -11,6 +11,7 @@ Cell::Cell() {
 	this->west = 0;
 	this->traversed = 0;
 	this->dist = -1;
+        this->floodfill_visited = false;
 }
 
 
@@ -23,12 +24,11 @@ Maze::Maze() {
         this->maze[15][0].south = 1;
         this->maze[15][0].west = 1;
         this->maze[15][0].east = 1;
+        
+        floodfill_next_x = 0;
+        floodfill_next_y = 13;
 }
 
-// void Maze::update_position(int index_x, int index_y) {
-// 	this->index_x = index_x;
-// 	this->index_y = index_y;
-// }
 
 void Maze::update_forwardonecell_position() { //also updates traversed
 	int new_index_x = index_x;
@@ -122,6 +122,13 @@ void Maze::maze_update_wall_middle() {
    }
 }
 
+void Maze::maze_reset_cur_cell_walls() {
+  (this->maze[this->index_y][this->index_x]).north = 0;
+  (this->maze[this->index_y][this->index_x]).east = 0;
+  (this->maze[this->index_y][this->index_x]).south = 0;
+  (this->maze[this->index_y][this->index_x]).west = 0;
+}
+
 boolean Maze::is_cur_wall_right() {
      if (this->mouse_direction == NORTH && (this->maze[this->index_y][this->index_x]).east == 1) return true;
      else if (this->mouse_direction == EAST && (this->maze[this->index_y][this->index_x]).south == 1) return true;
@@ -164,14 +171,6 @@ void Maze::print_maze_position() {
         else if (this->mouse_direction==SOUTH) Serial1.print("S");
         else if (this->mouse_direction==EAST) Serial1.print("E");
         Serial1.println(); 
-//	for(int y = 0; y < 16; ++y){ //row
-//		for(int x = 0; x < 16; ++x){ //column
-//			if (index_x == x && index_y == y) Serial1.print (" 1");
-//			else Serial1.print(" 0");
-//		}
-//		Serial1.println();
-//	}
-//	Serial1.println();
 }
 
 void Maze::print_maze_traversed() {

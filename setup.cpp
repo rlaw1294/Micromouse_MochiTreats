@@ -13,14 +13,17 @@ extern const int IR_PULSE_RATE = 500; //microseconds
 //Encoders
 volatile double g_ticks_left = 0;
 volatile double g_ticks_right = 0;
-extern const double TICKS_ONE_CELL = 1500;
-extern const double TICKS_90_TURN = 500;
+extern const double TICKS_ONE_CELL = 1680;
+extern const double TICKS_90_TURN = 475;
 
 //Maze
 
 //PID
 extern boolean use_ir_pid = true;
 extern boolean use_velocity_pid = true;
+
+//Settings
+extern int g_settings_decision = 0;
 
 
 /* --- DEBUGGER --- */
@@ -29,14 +32,14 @@ void timer_interrupt() {
   g_ir.ir_pulse();
 }
 
-const long DEBUGGER_PERIOD_MS = 100;
+const long DEBUGGER_PERIOD_MS = 250;
 long debugger_timer_time = 0;
 int timer_times_checked = 0;
 void debugger() {
   timer_times_checked += 1;
   long time_elapsed_ms = millis() - debugger_timer_time;
   if (time_elapsed_ms > DEBUGGER_PERIOD_MS) { //times 1000 because timer is in microsenconds
-    boolean time_elapsed = true;
+    boolean time_elapsed = false;
     boolean ir = false;
     boolean ir_control = false;
     boolean ir_wall_threshold = false;
@@ -102,6 +105,69 @@ extern const int g_left_led = 4;
 extern const int g_right_led = 3;
 
 
+static boolean is_settings_done = false;
+enum settings_states {ZERO, ONE, TWO, THREE, FOUR, START};
+int settings_SM_state = ZERO;
+
+void settings_SM() {
+  if (g_ticks_left < 500) settings_SM_state = ZERO;
+  else if (g_ticks_left >= 500 && g_ticks_left < 1000) settings_SM_state = ONE;
+  else if (g_ticks_left >= 1000 && g_ticks_left < 1500) settings_SM_state = TWO;
+  else settings_SM_state = THREE;
+  if (g_ticks_right > 500) settings_SM_state = START;
+  
+  switch(settings_SM_state) {
+    case ZERO:
+      digitalWrite(g_left_led, LOW);
+      digitalWrite(g_right_led, LOW);
+      g_settings_decision = 0;
+      break;
+    case ONE:
+      digitalWrite(g_left_led, LOW);
+      digitalWrite(g_right_led, HIGH);
+      g_settings_decision = 1;
+      break;
+    case TWO:
+      digitalWrite(g_left_led, HIGH);
+      digitalWrite(g_right_led, LOW);
+      g_settings_decision = 2;
+      break;
+    case THREE:
+      digitalWrite(g_left_led, HIGH);
+      digitalWrite(g_right_led, HIGH);
+      g_settings_decision = 3;
+      break;
+    case START:
+      digitalWrite(g_left_led, HIGH);
+      digitalWrite(g_right_led, HIGH);
+      digitalWrite(g_teensy_led, HIGH);
+      delay(500);
+      digitalWrite(g_left_led, LOW);
+      digitalWrite(g_right_led, LOW);
+      digitalWrite(g_teensy_led, LOW);
+      delay(500);
+      digitalWrite(g_left_led, HIGH);
+      digitalWrite(g_right_led, HIGH);
+      digitalWrite(g_teensy_led, HIGH);
+      delay(500);
+      digitalWrite(g_left_led, LOW);
+      digitalWrite(g_right_led, LOW);
+      digitalWrite(g_teensy_led, LOW);
+      delay(500);    
+      digitalWrite(g_left_led, HIGH);
+      digitalWrite(g_right_led, HIGH);
+      digitalWrite(g_teensy_led, HIGH);
+      delay(500);
+      g_ir.reset_control_values();
+      is_settings_done = true;
+      break;      
+    default:
+      break;
+  };
+}
+
+
+
 void set_pinmodes() {  
   
   //teensy LED
@@ -127,8 +193,8 @@ void set_pinmodes() {
   Timer1.initialize(IR_PULSE_RATE); //500 microseconds.... 1000microseconds per milisecond
   Timer1.start();  
   Timer1.attachInterrupt(timer_interrupt); //lul so cheap! ><"!... i hate this
-  delay(3000);
-  g_ir.reset_control_values();
+//  delay(2000);
+//  g_ir.reset_control_values();
   
   //ir phototransistors
   pinMode(g_ir_sensor_l,INPUT);
@@ -148,13 +214,12 @@ void set_pinmodes() {
   //LED
   pinMode(g_left_led, OUTPUT);
   pinMode(g_right_led, OUTPUT);
-  digitalWrite(g_left_led, HIGH);
-  digitalWrite(g_right_led, HIGH);
 
-//  delay(3000);
   //Serial
   Serial.begin(9600);
   Serial1.begin(9600);
+  
+  while(!is_settings_done) { settings_SM(); }
 }
 
 

@@ -12,12 +12,12 @@ extern const int g_right_led;
 extern volatile double g_ticks_left;
 extern volatile double g_ticks_right;
 
-static const double pid_timer_dt = 5; //polling interval in ms
+static const double pid_timer_dt = 3; //polling interval in ms
 static double cur_pid_timer_ms = 0;
 static double prev_pid_timer_ms = 0;
 
 //FOR IR CONTROL
-static const double Kp_ir = 0;
+static const double Kp_ir = .15;
 static const double Ki_ir = 0;
 static const double Kd_ir = 0;
 
@@ -25,10 +25,10 @@ int prev_ir_error = 0;
 float integ_ir_error = 0;
 
 //FOR VELOCITY CONTROL - 13, 1, 0
-static const double Kp_v = 13; //get to sp without too much oscillation asap
-static const double Ki_v = 1; //<1, super small
+static const double Kp_v = 8; //get to sp without too much oscillation asap
+static const double Ki_v = 0; //<1, super small
 static const double Kd_v = 0; //*5 to 20
-static const double SETPOINT_V = 1600/1000*pid_timer_dt; //Ticks per ms = ticks/sec * (sec/1000ms)
+static const double SETPOINT_V = 5000/1000*pid_timer_dt; //Ticks per ms = ticks/sec * (sec/1000ms)
 
 static int cur_encoder_left_ticks = 0;
 static int cur_encoder_right_ticks = 0;
@@ -54,7 +54,7 @@ void PID() {
     }
     prev_pid_timer_ms = (double)micros()/(double)1000;
     //take in values now so i work with values from same exact time as possible
-    int ir_error = 0;
+    double ir_error = 0;
     int cur_ir_left = g_ir.left;
     int cur_ir_right = g_ir.right;
     
@@ -79,7 +79,7 @@ void PID() {
     prev_ir_error = ir_error;
     
     integ_ir_error += ir_error*pid_timer_dt;
-    float deriv_ir_error = (float)(ir_error - prev_ir_error)/pid_timer_dt;
+    double deriv_ir_error = (double)(ir_error - prev_ir_error)/(double)pid_timer_dt;
     
     int total_ir_error = Kp_ir*ir_error + Ki_ir*integ_ir_error + Kd_ir*deriv_ir_error;
     

@@ -13,6 +13,8 @@ class Cell {
 		boolean west;
 		boolean east;
 		boolean traversed;
+                
+                boolean floodfill_visited;
 		int dist;
 
 		//functions
@@ -20,11 +22,13 @@ class Cell {
 };
 
 class Maze {
-	private:
+	public:
 		Cell maze[16][16];
 		int index_x; //x position
 		int index_y; //y position
 		int mouse_direction;
+                int floodfill_next_x;
+                int floodfill_next_y;
 
 	public:
 		Maze();
@@ -41,7 +45,7 @@ class Maze {
                 boolean is_cur_wall_front();
                 boolean is_cur_wall_back();
 
-		// void update_maze_position();
+                //position updates
 		void update_forwardonecell_position();
                 void update_turn90left_direction();
                 void update_turn90right_direction();
@@ -50,6 +54,7 @@ class Maze {
                 void maze_update_wall_sides();
                 void maze_update_wall_front();
                 void maze_update_wall_middle();
+                void maze_reset_cur_cell_walls();
 };
 
 #endif

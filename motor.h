@@ -20,6 +20,11 @@ class Motor {
       void Turn90Left();
       void Turn90Right();
       
+      void FaceNorth();
+      void FaceSouth();
+      void FaceWest();
+      void FaceEast();
+      
       void Off();
       
       void RepositionWithFrontMiddleWall();

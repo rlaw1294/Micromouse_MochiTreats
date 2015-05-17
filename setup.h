@@ -11,6 +11,7 @@
 
 void set_pinmodes();
 void timer_interrupt();
+void settings_SM();
 void debugger();
 
 #endif

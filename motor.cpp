@@ -54,7 +54,7 @@ void Motor::ForwardOneCell() {
     if (g_ir.mid > g_ir.control_mid) {
 //        RepositionWithFrontMiddleWall();
       g_maze.maze_update_wall_front();
-//      break;
+      break;
     }
 //    g_maze.maze_update_wall_middle(); //prone to error, use another method
   }
@@ -81,6 +81,35 @@ void Motor::Turn90Right() {
   g_maze.update_turn90right_direction();
   Off();
 //  Serial1.println("Spun 90 right");
+}
+
+      
+void Motor::FaceNorth() {
+  if (g_maze.mouse_direction == NORTH) { return; }
+  else if (g_maze.mouse_direction == SOUTH) { Turn90Right(); Turn90Right(); }
+  else if (g_maze.mouse_direction == WEST) { Turn90Right(); }
+  else if (g_maze.mouse_direction == EAST) { Turn90Left(); }
+}
+
+void Motor::FaceSouth() {
+  if (g_maze.mouse_direction == SOUTH) { return; }
+  else if (g_maze.mouse_direction == NORTH) { Turn90Right(); Turn90Right(); }
+  else if (g_maze.mouse_direction == EAST) { Turn90Right(); }
+  else if (g_maze.mouse_direction == WEST) { Turn90Left(); }
+}
+
+void Motor::FaceWest() {
+  if (g_maze.mouse_direction == WEST) { return; }
+  else if (g_maze.mouse_direction == EAST) { Turn90Right(); Turn90Right(); }
+  else if (g_maze.mouse_direction == SOUTH) { Turn90Right(); }
+  else if (g_maze.mouse_direction == NORTH) { Turn90Left(); }  
+}
+
+void Motor::FaceEast() {
+  if (g_maze.mouse_direction == EAST) { return; }
+  else if (g_maze.mouse_direction == WEST) { Turn90Right(); Turn90Right(); }
+  else if (g_maze.mouse_direction == NORTH) { Turn90Right(); }
+  else if (g_maze.mouse_direction == SOUTH) { Turn90Left(); }    
 }
 
 void Motor::Off() {
