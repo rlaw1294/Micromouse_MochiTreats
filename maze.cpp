@@ -69,7 +69,7 @@ void Maze::update_turn90right_direction() {
 }
 
 void Maze::maze_update_wall_sides() {
-  float wall_tolerance = 75;
+  float wall_tolerance = 25;
    if (g_ir.left > g_ir.left_wall_threshold - wall_tolerance) { //left wall
      if (this->mouse_direction == NORTH) { (this->maze[this->index_y][this->index_x]).west = 1; }
      else if (this->mouse_direction == EAST) { (this->maze[this->index_y][this->index_x]).north = 1; }
@@ -77,10 +77,10 @@ void Maze::maze_update_wall_sides() {
      else if (this->mouse_direction == WEST) { (this->maze[this->index_y][this->index_x]).south = 1; }
    }
    else { //no left wall
-     if (this->mouse_direction == NORTH) { (this->maze[this->index_y][this->index_x]).west = 0; }
-     else if (this->mouse_direction == EAST) { (this->maze[this->index_y][this->index_x]).north = 0; }
-     else if (this->mouse_direction == SOUTH) { (this->maze[this->index_y][this->index_x]).east = 0; }
-     else if (this->mouse_direction == WEST) { (this->maze[this->index_y][this->index_x]).south = 0; }
+//     if (this->mouse_direction == NORTH) { (this->maze[this->index_y][this->index_x]).west = 0; }
+//     else if (this->mouse_direction == EAST) { (this->maze[this->index_y][this->index_x]).north = 0; }
+//     else if (this->mouse_direction == SOUTH) { (this->maze[this->index_y][this->index_x]).east = 0; }
+//     else if (this->mouse_direction == WEST) { (this->maze[this->index_y][this->index_x]).south = 0; }
    }
    
    if (g_ir.right > g_ir.right_wall_threshold - wall_tolerance) { //right wall
@@ -90,10 +90,10 @@ void Maze::maze_update_wall_sides() {
      else if (this->mouse_direction == WEST) { (this->maze[this->index_y][this->index_x]).north = 1; }
    }
    else { //no right wall
-     if (this->mouse_direction == NORTH) { (this->maze[this->index_y][this->index_x]).east = 0; }
-     else if (this->mouse_direction == EAST) { (this->maze[this->index_y][this->index_x]).south = 0; }
-     else if (this->mouse_direction == SOUTH) { (this->maze[this->index_y][this->index_x]).west = 0; }
-     else if (this->mouse_direction == WEST) { (this->maze[this->index_y][this->index_x]).north = 0; }     
+//     if (this->mouse_direction == NORTH) { (this->maze[this->index_y][this->index_x]).east = 0; }
+//     else if (this->mouse_direction == EAST) { (this->maze[this->index_y][this->index_x]).south = 0; }
+//     else if (this->mouse_direction == SOUTH) { (this->maze[this->index_y][this->index_x]).west = 0; }
+//     else if (this->mouse_direction == WEST) { (this->maze[this->index_y][this->index_x]).north = 0; }     
    }
 }
 
@@ -246,124 +246,122 @@ void Maze::print_maze(){
 	return;
 }
 
+/////////////////////
+void Maze::BFShelper( int nmaze[16][16], int x, int y, int v, QueueList<Coord>& c ){
+            if( x > 0 ) {
+                if( nmaze[y][x-1] == -1 && !maze[y][x].west && !maze[y][x-1].east ) {
+                    nmaze[y][x-1] = v + 1;
+                    Coord t; t.y = y; t.x = x-1;
+                    c.push(t);
+                }
+            }
+            if( x < 15 ) {
+                if( nmaze[y][x+1] == -1 && !maze[y][x].east && !maze[y][x+1].west   ) {
+                    nmaze[y][x+1] = v + 1;
+                    Coord t; t.y = y; t.x = x+1;
+                    c.push(t);
+                }
+            }
+            if( y > 0 ) {
+                if( nmaze[y-1][x] == -1 && !maze[y][x].north  && !maze[y-1][x].south ) {
+                    nmaze[y-1][x] = v + 1;
+                    Coord t; t.y = y-1; t.x = x;
+                    c.push(t);
+                }
+            }
+            if( y < 15 ) {
+                if( nmaze[y+1][x] == -1 && !maze[y][x].south  && !maze[y+1][x].north ) {
+                    nmaze[y+1][x] = v + 1;
+                    Coord t; t.y = y+1; t.x = x;
+                    c.push(t);
+                }
+            }
+        }
+        
+        Coord Maze::nextCellRecurse( int x, int y ){
+             Serial1.print(x );
+             Serial1.print("," );
+             Serial1.print(y );
+             Serial1.print("--" );
+
+            int d = maze[y][x].dist;
+            Coord t;
+            if( d == 1 ){
+                t.x = x; t.y = y;
+                return t;
+            }
+            if( x > 0 && maze[y][x-1].dist == d-1 && !maze[y][x].west && !maze[y][x-1].east )  return nextCellRecurse(x-1,y);
+            if( x < 15 && maze[y][x+1].dist == d-1  && !maze[y][x].east &&!maze[y][x+1].west)  return nextCellRecurse(x+1,y);
+            if( y > 0 && maze[y-1][x].dist == d-1  && !maze[y][x].north && !maze[y-1][x].south)  return nextCellRecurse(x,y-1);
+            if( y < 15 && maze[y+1][x].dist == d-1  && !maze[y][x].south && !maze[y+1][x].north)  return nextCellRecurse(x,y+1);
+            return t;
+        }
+        
+        Coord Maze::nextCell( ){
+          Serial1.println(" ");
+            return nextCellRecurse( 7, 7);
+        }
+        
+        void Maze::BFS() {
+            QueueList<Coord> traversedCells;
+            
+            int nmaze[16][16];
+            for( int i = 0; i < 16; i++ ){
+                for( int j = 0; j < 16; j++ ){
+                    nmaze[i][j] = -1;
+                }
+            }
+            
+            Coord tempCoord; tempCoord.x = index_x; tempCoord.y = index_y;
+            nmaze[index_y][index_x] = 0;
+            traversedCells.push(tempCoord);
 
 
+            while( !traversedCells.isEmpty() ) {
+                Coord t = traversedCells.peek();
+                traversedCells.pop();
+                BFShelper( nmaze, t.x, t.y, nmaze[t.y][t.x], traversedCells );
+            }
+            
+            for( int i = 0; i < 16; i++ ){
+                for( int j = 0; j < 16; j++ ){
+                    maze[i][j].dist = nmaze[i][j];
+                }
+            }
+        }
+        
+		void Maze::print_nice_maze() {
+		    vector<String> gmaze; 
+		    for(int i = 0; i < 17; i++ ){
+		        gmaze.push_back("+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +");
+		        gmaze.push_back("                                                 ");
+		    }
+		    gmaze.pop_back();
+		    for(int i = 1; i <= 46; i+=3 ) {
+		        gmaze[0][i] = '-';
+		        gmaze[0][i+1] = '-';
+		        gmaze[32][i] = '-';
+		        gmaze[32][i+1] = '-';
+		    }		    
+		    for(int i = 1; i <= 32; i+=2 ) {
+		        gmaze[i][0] = '|';
+		        gmaze[i][48] = '|';
+		    }
+		    for( int i = 0; i < 16; i++ ) {
+		        for( int j = 0; j < 16; j++ ) {
+		            //if( maze[i][j].traversed ) {
+		                if( maze[i][j].east ) gmaze[i*2+1][j*3+3] = '|';
+		                if( maze[i][j].west ) gmaze[i*2+1][j*3] = '|';
+		                if( maze[i][j].north ) {gmaze[i*2][j*3+1] = '-'; gmaze[i*2][j*3+2] = '-';}
+		                if( maze[i][j].south ) { gmaze[i*2+2][j*3+1] = '-'; gmaze[i*2+2][j*3+2] = '-';}
+		            //}
+		            gmaze[i*2+1][j*3+1] = (char)(maze[i][j].dist/10+48);
+		            gmaze[i*2+1][j*3+2] = (char)(maze[i][j].dist%10+48);
+		        }
+		    }
+		    for( unsigned i = 0; i < gmaze.size(); i++ )
+		        Serial1.println(gmaze[i]);
+		    
+		};
 
-/* SOLVING LE MAZE */
-//void Maze::BFShelper( int nmaze[16][16], int x, int y, int v, queue<Coord>& c ){
-//            if( x > 0 ) {
-//                if( nmaze[y][x-1] == -1 && maze[y][x].west == 0) {
-//                    nmaze[y][x-1] = v + 1;
-//                    Coord t; t.y = y; t.x = x-1;
-//                    c.push(t);
-//                }
-//            }
-//            if( x < 15 ) {
-//                if( nmaze[y][x+1] == -1 && maze[y][x].east == 0 ) {
-//                    nmaze[y][x+1] = v + 1;
-//                    Coord t; t.y = y; t.x = x+1;
-//                    c.push(t);
-//                }
-//            }
-//            if( y > 0 ) {
-//                if( nmaze[y-1][x] == -1 && maze[y][x].south == 0 ) {
-//                    nmaze[y-1][x] = v + 1;
-//                    Coord t; t.y = y-1; t.x = x;
-//                    c.push(t);
-//                }
-//            }
-//            if( y < 15 ) {
-//                if( nmaze[y+1][x] == -1 && maze[y][x].north == 0 ) {
-//                    nmaze[y+1][x] = v + 1;
-//                    Coord t; t.y = y+1; t.x = x;
-//                    c.push(t);
-//                }
-//            }
-//        }
-//        
-//        Coord Maze::nextCellRecurse( int x, int y ){
-//            int d = maze[y][x].dist;
-//            Coord t;
-//            if( d == 1 ){
-//                t.x = x; t.y = y;
-//                return t;
-//            }
-//            if( x > 0 && maze[y][x-1].dist == d-1 )  return nextCellRecurse(x-1,y);
-//            if( x < 15 && maze[y][x+1].dist == d-1 )  return nextCellRecurse(x+1,y);
-//            if( y > 0 && maze[y-1][x].dist == d-1 )  return nextCellRecurse(x,y-1);
-//            if( y < 15 && maze[y+1][x].dist == d-1 )  return nextCellRecurse(x,y+1);
-//        }
-//        
-//        Coord Maze::nextCell( ){
-//            return nextCellRecurse( 7, 7);
-//        }
-//        
-//        void Maze::BFS() {
-//            queue<Coord> traversedCells;
-//            
-//            int nmaze[16][16];
-//            for( int i = 0; i < 16; i++ ){
-//                for( int j = 0; j < 16; j++ ){
-//                    nmaze[i][j] = -1;
-//                }
-//            }
-//            
-//            Coord tempCoord; tempCoord.x = 0; tempCoord.y = 15;
-//            nmaze[15][0] = 0;
-//            traversedCells.push(tempCoord);
-//
-//
-//            while( !traversedCells.empty() ) {
-//                Coord t = traversedCells.front();
-//                traversedCells.pop();
-//                BFShelper( nmaze, t.x, t.y, nmaze[t.y][t.x], traversedCells );
-//            }
-//            
-//            for( int i = 0; i < 16; i++ ){
-//                for( int j = 0; j < 16; j++ ){
-//                    maze[i][j].dist = nmaze[i][j];
-//                    //cout << nmaze[i][j] << ' ';
-//                }
-//                //cout << endl;
-//            }
-//            
-//            //BFShelper(nmaze);
-//            //cout << endl << nmaze[5][5];
-//            
-//            
-//            
-//        }
-//        
-//		void Maze::print_nice_maze() {
-//		    vector<string> gmaze; 
-//		    for(int i = 0; i < 17; i++ ){
-//		        gmaze.push_back("+  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +");
-//		        gmaze.push_back("                                                 ");
-//		    }
-//		    gmaze.pop_back();
-//		    for(int i = 1; i <= 46; i+=3 ) {
-//		        gmaze[0][i] = '-';
-//		        gmaze[0][i+1] = '-';
-//		        gmaze[32][i] = '-';
-//		        gmaze[32][i+1] = '-';
-//		    }		    
-//		    for(int i = 1; i <= 32; i+=2 ) {
-//		        gmaze[i][0] = '|';
-//		        gmaze[i][48] = '|';
-//		    }
-//		    for( int i = 0; i < 16; i++ ) {
-//		        for( int j = 0; j < 16; j++ ) {
-//		            if( maze[i][j].traversed ) {
-//		                if( maze[i][j].east ) gmaze[i*2+1][j*3+2] = '|';
-//		                if( maze[i][j].west ) gmaze[i*2+1][j*3] = '|';
-//		                if( maze[i][j].north ) {gmaze[i*2][j*3+1] = '-'; gmaze[i*2][j*3+2] = '-';}
-//		                if( maze[i][j].south ) { gmaze[i*2+2][j*3+1] = '-'; gmaze[i*2+2][j*3+2] = '-';}
-//		            }
-//		            gmaze[i*2+1][j*3+1] = (char)(maze[i][j].dist/10+48);
-//		            gmaze[i*2+1][j*3+2] = (char)(maze[i][j].dist%10+48);
-//		        }
-//		    }
-//		    for( int i = 0; i < gmaze.size(); i++ )
-//		        cout << gmaze[i] << endl;
-//		    
-//		};
+

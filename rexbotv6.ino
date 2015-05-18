@@ -13,6 +13,7 @@ extern Motor g_motor;
 extern Maze g_maze;
 
 extern int g_settings_decision;
+extern boolean right_wall_randomvar;
 
 void setup() {
   set_pinmodes();
@@ -21,21 +22,24 @@ void setup() {
 void loop() {
   if (g_settings_decision==0) {
     drive_right_wall_SM();
-    debugger();
+    right_wall_randomvar = false;
+//    debugger();
   }
   else if (g_settings_decision==1) {
     drive_left_wall_SM();
-    debugger();
+//    debugger();
   }
   else if (g_settings_decision==2) {
-    drive_straight_only_SM();  
-    debugger();
+    drive_right_wall_SM();
+    right_wall_randomvar = true;
+    //    drive_straight_only_SM();  
+//    debugger();
   }
   else {
-//    drive_right_wall_SM();
-    debugger();
+    drive_floodfill_maybe_SM();
+    delay(25);
+//    debugger();
   }  
-//g_motor.MoveForward();
 }
 
 

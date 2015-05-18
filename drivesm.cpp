@@ -3,6 +3,10 @@
 extern Motor g_motor;
 extern Maze g_maze;
 
+extern int g_settings_decision;
+boolean right_wall_randomvar = false;
+
+
 enum drive_right_wall_SM_states {INITDRIVERIGHT, FORWARD, TURN90L, TURN90RFORWARD};
 static int drive_right_wall_SM_state = INITDRIVERIGHT;
 
@@ -14,6 +18,11 @@ void drive_right_wall_SM() {
 	    	break;
 	    case FORWARD:
                 if (g_maze.is_cur_wall_front() && g_maze.is_cur_wall_right() && g_maze.is_cur_wall_back() && g_maze.is_cur_wall_left()) { g_maze.maze_reset_cur_cell_walls(); }
+                if (right_wall_randomvar == true) {
+                  unsigned long temp = micros();
+                  if(temp%4==0) g_motor.ForwardOneCell(); 
+                  if(temp%5==0) g_motor.Turn90Left();
+                }
                 if (!g_maze.is_cur_wall_front() && g_maze.is_cur_wall_right()) drive_right_wall_SM_state=FORWARD;
 	    	else if (g_maze.is_cur_wall_front() && g_maze.is_cur_wall_right()) drive_right_wall_SM_state=TURN90L;
                 else drive_right_wall_SM_state=TURN90RFORWARD;
@@ -173,6 +182,7 @@ void drive_straight_only_SM() {
 enum drive_floodfill_maybe_SM_states {FFMINIT, FFMFORWARD};
 static int drive_floodfill_maybe_SM_state = FFMINIT;
 
+Coord next_cell;
 void drive_floodfill_maybe_SM() {
 
 	//transition
@@ -181,13 +191,8 @@ void drive_floodfill_maybe_SM() {
 	    	drive_floodfill_maybe_SM_state = FFMINIT;
 	    	break;
 	    case FFMFORWARD:
-                maze_floodfill(0, 0, g_maze.index_x, g_maze.index_y, 0);
-                //clear floodfilled cells
-                for (int i=0; i<16; i++) {
-                  for (int j=0; j<16; j++) {
-                    (g_maze.maze[j][i]).dist = -1;
-                  }  
-                }                
+                g_maze.BFS();
+                next_cell = g_maze.nextCell();
                 drive_floodfill_maybe_SM_state=FFMFORWARD;
 	    	break;
 	    default:
@@ -207,37 +212,40 @@ void drive_floodfill_maybe_SM() {
                 drive_floodfill_maybe_SM_state=FFMFORWARD;
 	    	break;
 	    case FFMFORWARD:
-                if (g_maze.floodfill_next_x == g_maze.index_x) {
-                  if (g_maze.floodfill_next_y == g_maze.index_y+1) {
-//                    g_motor.FaceSouth();
-//                    g_motor.ForwardOneCell();
+//                g_maze.print_nice_maze();
+                if (next_cell.x == g_maze.index_x) {
+                  if (next_cell.y == g_maze.index_y+1) {
+                    g_motor.FaceSouth();
+                    g_motor.ForwardOneCell();
                   }
-                  else if (g_maze.floodfill_next_y == g_maze.index_y-1) {
-//                    g_motor.FaceNorth();
-//                    g_motor.ForwardOneCell();
+                  else if (next_cell.y == g_maze.index_y-1) {
+                    g_motor.FaceNorth();
+                    g_motor.ForwardOneCell();
                   }
                 }
-                else if (g_maze.floodfill_next_y == g_maze.index_y) {
-                  if (g_maze.floodfill_next_x == g_maze.index_x+1) {
-//                    g_motor.FaceEast();
-//                    g_motor.ForwardOneCell();
+                else if (next_cell.y == g_maze.index_y) {
+                  if (next_cell.x == g_maze.index_x+1) {
+                    g_motor.FaceEast();
+                    g_motor.ForwardOneCell();
                   }
-                  else if (g_maze.floodfill_next_x == g_maze.index_x-1) {
-//                    g_motor.FaceWest();
-//                    g_motor.ForwardOneCell();
+                  else if (next_cell.x == g_maze.index_x-1) {
+                    g_motor.FaceWest();
+                    g_motor.ForwardOneCell();
                   }
                 }
                 else {
                   Serial1.println("STUPID");
+                  g_settings_decision = 0;
+                  drive_right_wall_SM_state = FORWARD;
                 }
-                  Serial1.print("X: ");
-                  Serial1.print(g_maze.floodfill_next_y);
-                  Serial1.print("   ");
-                  Serial1.print("Y: ");
-                  Serial1.print(g_maze.floodfill_next_x);
-                  Serial1.println();                
+//                  Serial1.print("X: ");
+//                  Serial1.print(next_cell.x);
+//                  Serial1.print("   ");
+//                  Serial1.print("Y: ");
+//                  Serial1.print(next_cell.y);
+//                  Serial1.println();       
                 drive_floodfill_maybe_SM_state=FFMFORWARD;
-                delay(200);
+//                delay(200);
 	    	break;
 	    default:
 	    	break;

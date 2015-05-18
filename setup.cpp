@@ -14,7 +14,7 @@ extern const int IR_PULSE_RATE = 500; //microseconds
 volatile double g_ticks_left = 0;
 volatile double g_ticks_right = 0;
 extern const double TICKS_ONE_CELL = 1680;
-extern const double TICKS_90_TURN = 475;
+extern const double TICKS_90_TURN = 505;
 
 //Maze
 
@@ -44,11 +44,11 @@ void debugger() {
     boolean ir_control = false;
     boolean ir_wall_threshold = false;
     boolean motor_speed = false;
-    boolean motor_encoders = true;
+    boolean motor_encoders = false;
     boolean maze = false;
     boolean maze_traversed = false;
-    boolean maze_position = false;
-    boolean maze_walls_cur_cell = false;
+    boolean maze_position = true;
+    boolean maze_walls_cur_cell = true;
     boolean maze_cur_cell = false; //pretty crappy right now
 
     if (time_elapsed) {
