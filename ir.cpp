@@ -41,7 +41,6 @@ void IRSensorReading::reset_control_values() {
   this->left_wall_threshold = this->control_left*(1-this->wall_threshold);
   this->mid_wall_threshold = this->control_mid*(1-this->wall_threshold);
   this->right_wall_threshold = this->control_right*(1-this->wall_threshold);
-  print_control_values();
 }
 
 void IRSensorReading::read_mid() {

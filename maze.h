@@ -41,7 +41,7 @@ class Maze {
 
 	public:
 		Maze();
-		void print_maze();
+                void print_nice_maze();
 		void print_maze_position();
 		void print_maze_traversed();
                 void print_cell(int x, int y);
@@ -70,8 +70,6 @@ class Maze {
                 Coord nextCellRecurse( int x, int y );
                 Coord nextCell( );
                 void BFS();
-                void print_nice_maze();
-
 };
 
 #endif

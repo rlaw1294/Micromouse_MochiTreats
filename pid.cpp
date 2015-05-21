@@ -3,20 +3,17 @@
 extern IRSensorReading g_ir;
 extern Motor g_motor;
 
-extern boolean use_ir_pid;
-extern boolean use_velocity_pid;
-
 extern const int g_left_led;
 extern const int g_right_led;
 
 extern volatile double g_ticks_left;
 extern volatile double g_ticks_right;
 
+/* --- ADJUSTABLE CONSTANTS --- */
 static const double pid_timer_dt = 3; //polling interval in ms
-static double cur_pid_timer_ms = 0;
 static double prev_pid_timer_ms = 0;
 
-//FOR IR CONTROL
+//ir control
 static const double Kp_ir = .15;
 static const double Ki_ir = 0;
 static const double Kd_ir = 0;
@@ -24,8 +21,8 @@ static const double Kd_ir = 0;
 int prev_ir_error = 0;
 float integ_ir_error = 0;
 
-//FOR VELOCITY CONTROL - 13, 1, 0
-static const double Kp_v = 8; //get to sp without too much oscillation asap
+//velocity control - 13, 1, 0 (probably did this stuff kinda wrong)
+static const double Kp_v = 9; //get to sp without too much oscillation asap
 static const double Ki_v = 0; //<1, super small
 static const double Kd_v = 0; //*5 to 20
 static const double SETPOINT_V = 5000/1000*pid_timer_dt; //Ticks per ms = ticks/sec * (sec/1000ms)
@@ -38,6 +35,8 @@ static double prev_v_error_left = 0;
 static double prev_v_error_right = 0;
 static double integ_v_error_left = 0;
 static double integ_v_error_right = 0;
+
+
 
 void PID() {
     /* IR PID */
@@ -112,9 +111,6 @@ void PID() {
     double total_v_error_left = Kp_v*v_error_left + Ki_v*integ_v_error_left + Kd_v*deriv_v_error_left;
     double total_v_error_right = Kp_v*v_error_right + Ki_v*integ_v_error_right + Kd_v*deriv_v_error_right;
 
-
-//    if (use_ir_pid == false) total_ir_error = 0;
-//    if (use_velocity_pid == false) { total_v_error_left = 0; total_v_error_right = 0; }
     g_motor.SetLeftPWM(total_ir_error - total_v_error_left);
     g_motor.SetRightPWM(-1*total_ir_error - total_v_error_right);
 }

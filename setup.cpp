@@ -13,25 +13,22 @@ extern const int IR_PULSE_RATE = 500; //microseconds
 //Encoders
 volatile double g_ticks_left = 0;
 volatile double g_ticks_right = 0;
-extern const double TICKS_ONE_CELL = 1680;
-extern const double TICKS_90_TURN = 505;
+extern const double TICKS_ONE_CELL = 1685;
+extern const double TICKS_90_TURN = 490;
 
 //Maze
 
 //PID
-extern boolean use_ir_pid = true;
-extern boolean use_velocity_pid = true;
 
 //Settings
-extern int g_settings_decision = 0;
+int g_settings_decision = 0;
 
-
-/* --- DEBUGGER --- */
-//DEBUGGER + TIMER INTERRUPT
+//Timer Interrupt
 void timer_interrupt() {
   g_ir.ir_pulse();
 }
 
+/* --- DEBUGGER --- */
 const long DEBUGGER_PERIOD_MS = 250;
 long debugger_timer_time = 0;
 int timer_times_checked = 0;
@@ -61,7 +58,7 @@ void debugger() {
     if (ir) g_ir.print_values();
     if (motor_encoders) print_encoder_values();
     if (motor_speed) g_motor.print_motor_values();
-    if (maze) g_maze.print_maze();
+    if (maze) g_maze.print_nice_maze();
     if (maze_traversed) g_maze.print_maze_traversed();
     if (maze_position) g_maze.print_maze_position();
     if (maze_walls_cur_cell) g_maze.print_maze_walls_cur_cell();
@@ -80,7 +77,7 @@ extern const int g_motor_left_ccw = 23;
 extern const int g_motor_right_cw = 20; 
 extern const int g_motor_right_ccw = 21;
 
-//teensy LED
+//teensy led
 extern const int g_teensy_led = 13;
 
 //ir pins
@@ -99,12 +96,12 @@ extern const int g_encoderLeftB = 7;
 extern const int g_encoderRightA = 5;
 extern const int g_encoderRightB = 6;
 
-
-//LED
+//led
 extern const int g_left_led = 4;
 extern const int g_right_led = 3;
 
 
+/* --- SETTINGS SM --- */
 static boolean is_settings_done = false;
 enum settings_states {ZERO, ONE, TWO, THREE, FOUR, START};
 int settings_SM_state = ZERO;
@@ -167,7 +164,7 @@ void settings_SM() {
 }
 
 
-
+/* --- PINMODE INITIATION --- */
 void set_pinmodes() {  
   
   //teensy LED
@@ -190,11 +187,9 @@ void set_pinmodes() {
   pinMode(g_ir_led_m,OUTPUT);
   pinMode(g_ir_led_r,OUTPUT);
   
-  Timer1.initialize(IR_PULSE_RATE); //500 microseconds.... 1000microseconds per milisecond
+  Timer1.initialize(IR_PULSE_RATE);
   Timer1.start();  
   Timer1.attachInterrupt(timer_interrupt); //lul so cheap! ><"!... i hate this
-//  delay(2000);
-//  g_ir.reset_control_values();
   
   //ir phototransistors
   pinMode(g_ir_sensor_l,INPUT);

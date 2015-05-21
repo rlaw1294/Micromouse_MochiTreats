@@ -1,3 +1,5 @@
+//this doesn't work, use the bst() in maze.cpp that eric made :)....fix this later, maybe
+
 #include "floodfill.h"
 
 enum compass_direction {NORTH, SOUTH, EAST, WEST};

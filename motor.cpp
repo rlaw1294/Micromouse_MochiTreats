@@ -4,9 +4,6 @@ extern Maze g_maze;
 extern IRSensorReading g_ir;
 enum direction_facing {NORTH, SOUTH, EAST, WEST};
 
-//extern boolean use_ir_pid;
-//extern boolean use_velocity_pid;
-
 extern int g_motor_left_cw;
 extern int g_motor_left_ccw;
 extern int g_motor_right_cw;
@@ -18,12 +15,10 @@ extern volatile double g_ticks_right;
 extern const double TICKS_ONE_CELL;
 extern const double TICKS_90_TURN;
 
-//extern unsigned long motor_velocity_timer_time_ms;
 
-/* --- PUBLICS --- */
 Motor::Motor()
 {
-    this->MAXPWM = .3*255;
+    this->MAXPWM = .4*255;
     this->BASEPWM = .75*(this->MAXPWM);
     this->left_pwm = this->MAXPWM;
     this->right_pwm = this->MAXPWM;
@@ -34,25 +29,24 @@ void Motor::MoveForward() {
   else { MoveLeftBackward(); }
   if (this->right_pwm >=0) { MoveRightForward(); }
   else { MoveRightBackward(); }
-//  use_ir_pid = true;
-//  use_velocity_pid = true;
   PID();
 }
 
 void Motor::ForwardOneCell() {
-  double end_ticks_left = g_ticks_left + TICKS_ONE_CELL;
+  double start_ticks_left = g_ticks_left;
+  double start_ticks_right = g_ticks_right;  
   double midway_point_ticks = g_ticks_left + TICKS_ONE_CELL/2;
   boolean maze_halfwaypoint_updated = 0;
-//  double end_ticks_right = g_ticks_right + TICKS_ONE_CELL;
-  while(g_ticks_left < end_ticks_left) { //|| g_ticks_right < end_ticks_right ... favor left encoder for now..get a pid later for this...also need a tolerance
+  
+  while( ((g_ticks_left-start_ticks_left)+(g_ticks_right-start_ticks_right))/2 < TICKS_ONE_CELL ) {  //need a tolerance?
     MoveForward();
     if (g_ticks_left >= midway_point_ticks-50 && g_ticks_left <= midway_point_ticks+50 && !maze_halfwaypoint_updated) {
       g_maze.update_forwardonecell_position();
       g_maze.maze_update_wall_sides();
       maze_halfwaypoint_updated = 1;
     }
-    if (g_ir.mid > g_ir.control_mid) {
-//        RepositionWithFrontMiddleWall();
+    if (g_ir.mid > g_ir.mid_wall_threshold) {
+//        RepositionWithFrontMiddleWall();   //battery pack wires get in the way lol
       g_maze.maze_update_wall_front();
       break;
     }
@@ -62,9 +56,10 @@ void Motor::ForwardOneCell() {
 }
 
 void Motor::Turn90Left() {
-  double end_ticks_left = g_ticks_left - TICKS_90_TURN;
-  double end_ticks_right = g_ticks_right + TICKS_90_TURN;
-  while(g_ticks_left > end_ticks_left || g_ticks_right < end_ticks_right) {
+  double start_ticks_left = g_ticks_left;
+  double start_ticks_right = g_ticks_right;
+
+  while( ((start_ticks_left-g_ticks_left)+(g_ticks_right-start_ticks_right))/2 < TICKS_90_TURN ) {  
     SpinLeft(); 
   }
   g_maze.update_turn90left_direction();
@@ -73,9 +68,10 @@ void Motor::Turn90Left() {
 }
 
 void Motor::Turn90Right() {
-  double end_ticks_left = g_ticks_left + TICKS_90_TURN;
-  double end_ticks_right = g_ticks_right - TICKS_90_TURN;
-  while(g_ticks_left < end_ticks_left || g_ticks_right > end_ticks_right) {
+  double start_ticks_left = g_ticks_left;
+  double start_ticks_right = g_ticks_right;  
+
+  while( ((g_ticks_left-start_ticks_left)+(start_ticks_right-g_ticks_right))/2 < TICKS_90_TURN ) {  
     SpinRight();
   }
   g_maze.update_turn90right_direction();
@@ -214,7 +210,7 @@ void Motor::SetRightPWM(float pwm) {
 
 
 
-
+//should throw,catch,try,assert whatever rather than those if statements
 void Motor::MoveLeftForward() {
   if (this->left_pwm < 0) { Serial1.println("negative pwm ... but leftforward called?!"); }
   else {

@@ -12,6 +12,7 @@ void drive_right_wall_SM();
 void drive_left_wall_SM();
 void drive_straight_only_SM();
 void drive_floodfill_maybe_SM();
+void drive_bluetooth_manual_SM(); //LOL the BadMannered sm :P
 
 #endif
 

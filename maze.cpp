@@ -68,6 +68,7 @@ void Maze::update_turn90right_direction() {
   else if (temp_mouse_direction == WEST) this->mouse_direction = NORTH;
 }
 
+//took out wall resetting and went for method where only put in walls we know are there for sure
 void Maze::maze_update_wall_sides() {
   float wall_tolerance = 25;
    if (g_ir.left > g_ir.left_wall_threshold - wall_tolerance) { //left wall
@@ -242,10 +243,6 @@ void Maze::print_cur_cell() {
   print_cell(index_x, index_y);
 }
 
-void Maze::print_maze(){
-	return;
-}
-
 /////////////////////
 void Maze::BFShelper( int nmaze[16][16], int x, int y, int v, QueueList<Coord>& c ){
             if( x > 0 ) {
@@ -329,6 +326,7 @@ void Maze::BFShelper( int nmaze[16][16], int x, int y, int v, QueueList<Coord>& 
                 }
             }
         }
+        
         
 		void Maze::print_nice_maze() {
 		    vector<String> gmaze; 

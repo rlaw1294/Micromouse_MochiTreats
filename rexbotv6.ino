@@ -26,20 +26,20 @@ void loop() {
 //    debugger();
   }
   else if (g_settings_decision==1) {
-    drive_left_wall_SM();
+//    g_motor.Turn90Left();
+    g_motor.ForwardOneCell();
+    delay(500);
 //    debugger();
   }
   else if (g_settings_decision==2) {
-    drive_right_wall_SM();
-    right_wall_randomvar = true;
-    //    drive_straight_only_SM();  
+    drive_bluetooth_manual_SM();
+//    drive_right_wall_SM();
+//    right_wall_randomvar = true;
 //    debugger();
   }
   else {
     drive_floodfill_maybe_SM();
-    delay(25);
 //    debugger();
-  }  
+  }
 }
-
 
