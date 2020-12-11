@@ -1,7 +1,7 @@
 # Micromouse_MochiTreats
-Treats for umouse for the 2015 Micromouse Competitions
+Our umouse for the 2015 Micromouse Competitions
 
-Wow, our turn!! :D: https://youtu.be/ZRsOg5tFafM?t=42m22s
+Our turn!! :D https://youtu.be/ZRsOg5tFafM?t=42m22s
 
 
 
